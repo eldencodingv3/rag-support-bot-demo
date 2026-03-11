@@ -1,4 +1,7 @@
+import json
 import os
+import re
+
 from openai import OpenAI
 import chromadb
 
@@ -120,3 +123,45 @@ def query_rag(question: str) -> dict:
 
     answer = chat_response.choices[0].message.content
     return {"answer": answer, "sources": sources}
+
+
+_faq_data = None
+
+
+def _load_faq():
+    global _faq_data
+    if _faq_data is None:
+        faq_path = os.path.join(os.path.dirname(__file__), "dataset", "faq.json")
+        with open(faq_path, "r") as f:
+            _faq_data = json.load(f)
+    return _faq_data
+
+
+def _keyword_score(query: str, text: str) -> float:
+    query_words = set(re.findall(r'\w+', query.lower()))
+    text_words = set(re.findall(r'\w+', text.lower()))
+    if not query_words:
+        return 0.0
+    return len(query_words & text_words) / len(query_words)
+
+
+def query_fallback(question: str) -> dict:
+    faq = _load_faq()
+    scored = []
+    for entry in faq:
+        q_score = _keyword_score(question, entry["question"])
+        a_score = _keyword_score(question, entry["answer"])
+        score = max(q_score, a_score * 0.8)
+        scored.append((score, entry))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    top = scored[:3]
+    if top[0][0] < 0.1:
+        return {
+            "answer": "I don't have specific information about that in our FAQ. Please contact our support team for further assistance.",
+            "sources": [],
+            "mode": "fallback"
+        }
+    best = top[0][1]
+    answer = best["answer"]
+    sources = [{"question": e["question"], "category": e.get("category", "general"), "relevance": round(s, 3)} for s, e in top if s > 0.1]
+    return {"answer": answer, "sources": sources, "mode": "fallback"}
