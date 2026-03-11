@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support Bot</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="chat-container">
+    <header class="chat-header">
+      <h1>Support Bot</h1>
+      <p>Ask me anything &mdash; I&rsquo;m here to help.</p>
+    </header>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="welcome">
+        <p>Hi! Try one of these questions to get started:</p>
+        <div class="example-chips">
+          <button class="chip" data-question="How do I reset my password?">How do I reset my password?</button>
+          <button class="chip" data-question="What is your refund policy?">What is your refund policy?</button>
+          <button class="chip" data-question="How long does shipping take?">How long does shipping take?</button>
+        </div>
+      </div>
+    </div>
+
+    <form class="chat-input" id="chatForm">
+      <input
+        type="text"
+        id="chatInput"
+        placeholder="Type your question..."
+        autocomplete="off"
+        required
+      >
+      <button type="submit" id="sendBtn" aria-label="Send message">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </form>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
