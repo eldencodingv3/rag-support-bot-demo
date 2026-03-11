@@ -11,7 +11,7 @@ from pydantic import BaseModel
 load_dotenv()
 
 from ingest import ingest_dataset
-from rag import query_rag
+from rag import query_fallback, query_rag
 
 
 @asynccontextmanager
@@ -62,13 +62,11 @@ async def health():
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    if not os.environ.get("OPENAI_API_KEY"):
-        return ChatResponse(
-            answer="Error: OPENAI_API_KEY is not configured. Please set the environment variable.",
-            sources=[],
-        )
     try:
-        result = query_rag(request.question)
+        if os.environ.get("OPENAI_API_KEY"):
+            result = query_rag(request.question)
+        else:
+            result = query_fallback(request.question)
         return ChatResponse(**result)
     except Exception as e:
         return ChatResponse(
