@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main, feat/backend]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate app imports
+        run: python -c "from main import app; print('Import OK')"
+
+      - name: Validate dataset
+        run: python -c "import json; data = json.load(open('dataset/faq.json')); assert len(data) >= 20; print(f'Dataset OK: {len(data)} entries')"
